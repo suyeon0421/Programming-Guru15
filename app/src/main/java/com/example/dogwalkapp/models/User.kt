@@ -12,6 +12,7 @@ data class User(
     @get:Exclude //이메일 주소는 Firebase에 있으므로 중복 저장X
     var email: String = "",
     var password: String = "",
+    var userId: String = "",
 
     var pet: Pet = Pet(),
 
