@@ -46,6 +46,10 @@ dependencies {
 
     implementation("com.kakao.sdk:v2-user:2.19.0") // 카카오 로그인
 
+    implementation ("com.google.android.gms:play-services-maps:18.1.0")       // 지도
+    implementation ("com.google.android.gms:play-services-location:21.0.1")  // 위치
+
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
