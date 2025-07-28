@@ -19,6 +19,64 @@
         <item name="rippleColor">@android:color/transparent</item>
     </style>
 
+    <style name="ChipStyle.DarkBlueOutline" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/chip_background_color2</item>
+        <item name="chipStrokeColor">@color/chip_stroke_color2</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipCornerRadius">16dp</item>
+        <item name="android:textColor">@color/chip_text_color2</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="rippleColor">@android:color/transparent</item>
+    </style>
+
+    <style name="ChipStyle.BlueFilled.ReadOnly" parent="Widget.MaterialComponents.Chip.Entry">
+        <item name="chipBackgroundColor">#6CA1D9</item>
+        <item name="chipStrokeColor">#6CA1D9</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">14sp</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="closeIconVisible">false</item> <!-- X 아이콘 제거 -->
+        <item name="android:clickable">false</item>
+        <item name="android:focusable">false</item>
+    </style>
+
+    <style name="ChipStyle.DarkBlueFilled.ReadOnly" parent="Widget.MaterialComponents.Chip.Entry">
+        <item name="chipBackgroundColor">#224263</item>
+        <item name="chipStrokeColor">#224263</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">14sp</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="closeIconVisible">false</item> <!-- X 아이콘 제거 -->
+        <item name="android:clickable">false</item>
+        <item name="android:focusable">false</item>
+    </style>
+
+    <style name="ChipStyle.BlueFilled" parent="Widget.MaterialComponents.Chip.Entry">
+        <item name="chipBackgroundColor">#6CA1D9</item>
+        <item name="chipStrokeColor">#6CA1D9</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">14sp</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="closeIconVisible">true</item> <!-- X 아이콘 제거 -->
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="ChipStyle.DarkBlueFilled" parent="Widget.MaterialComponents.Chip.Entry">
+        <item name="chipBackgroundColor">#224263</item>
+        <item name="chipStrokeColor">#224263</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">14sp</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="closeIconVisible">true</item> <!-- X 아이콘 제거 -->
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
 
     <style name="Theme.DogWalkApp" parent="Base.Theme.DogWalkApp" />
 </resources>

@@ -28,12 +28,23 @@ import com.google.android.gms.maps.model.PolylineOptions
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import kotlin.math.roundToInt
+import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Looper
+import android.util.Log
+import android.widget.Toast
+import androidx.core.net.toUri
+import com.google.android.gms.maps.model.LatLngBounds
+import java.io.File
+import java.io.FileOutputStream
+import java.time.LocalDate
 
 class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
+    private lateinit var locationRequest: LocationRequest // LocationRequest를 클래스 멤버로 선언
 
     private lateinit var tvTimer: TextView
     private lateinit var tvSpeed: TextView
@@ -50,7 +61,7 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
     private var caloriesValue = 0
     private var timerRunning = false
 
-    private val handler = Handler()
+    private val handler = Handler(Looper.getMainLooper()) // Looper.getMainLooper() 명시
     private val timerRunnable = object : Runnable {
         override fun run() {
             if (timerRunning) {
@@ -71,6 +82,49 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
         tvKcal = findViewById(R.id.tv_kcal)
         btnStart = findViewById(R.id.btn_start_walk)
 
+        // LocationCallback 초기화
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                for (location in result.locations) {
+                    val latLng = LatLng(location.latitude, location.longitude)
+                    pathPoints.add(latLng)
+
+                    if (polyline == null) {
+                        polyline = map.addPolyline(
+                            PolylineOptions()
+                                .color(Color.BLUE)
+                                .width(10f)
+                        )
+                        Log.d("PolylineDebug", "Polyline 생성됨")
+                    }
+                    polyline?.points = pathPoints
+                    Log.d("PolylineDebug", "Polyline 점 갯수: ${pathPoints.size}")
+
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17f))
+
+                    if (pathPoints.size >= 2) {
+                        val last = pathPoints[pathPoints.size - 2]
+                        val current = pathPoints.last()
+                        val distanceResult = FloatArray(1)
+                        Location.distanceBetween(
+                            last.latitude, last.longitude,
+                            current.latitude, current.longitude,
+                            distanceResult
+                        )
+                        totalDistance += distanceResult[0].toDouble()
+                        updateMetrics()
+                    }
+                }
+            }
+        }
+
+        // LocationRequest 초기화 (onCreate에서 미리 생성)
+        locationRequest = LocationRequest.create().apply {
+            interval = 5000
+            fastestInterval = 3000
+            priority = Priority.PRIORITY_HIGH_ACCURACY
+        }
+
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
@@ -78,26 +132,59 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
 
         btnStart.setOnClickListener {
             if (!tracking) {
-                startTracking()
-                btnStart.text = "산책 끝내기"
+                // MainActivity에서 권한을 이미 받았다는 가정하에, 여기서는 권한이 있는지 확인만 합니다.
+                if (checkLocationPermission()) {
+                    startTracking()
+                    btnStart.text = "산책 끝내기" // 시작 시 버튼 텍스트 변경
+                } else {
+                    // 이 경우는 MainActivity에서 권한을 받지 못했거나,
+                    // 사용자가 이후에 권한을 취소한 경우에 해당합니다.
+                    // 사용자에게 권한이 필요함을 알리는 메시지를 표시하는 것이 좋습니다.
+                    Toast.makeText(this, "위치 권한이 필요합니다. 앱 설정에서 권한을 허용해주세요.", Toast.LENGTH_LONG).show()
+                }
             } else {
                 stopTracking()
-                // btnStart.text = "산책 시작하기" // finish() 이후니까 무의미
             }
         }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
-        map.uiSettings.isZoomControlsEnabled = true
-
-        map.isMyLocationEnabled = true
-        map.uiSettings.isMyLocationButtonEnabled = true
+        // 권한이 있다면 내 위치 표시 및 버튼 활성화
+        if (checkLocationPermission()) {
+            map.isMyLocationEnabled = true
+            map.uiSettings.isMyLocationButtonEnabled = true
+        } else {
+            // 권한이 없다면 내 위치 기능 비활성화 또는 메시지 표시
+            Log.w("WalkActivity", "Location permission not granted. MyLocation layer will be disabled.")
+            // 사용자에게 메시지를 보여줄 수도 있습니다.
+            // Toast.makeText(this, "위치 권한이 없어 내 위치를 표시할 수 없습니다.", Toast.LENGTH_SHORT).show()
+        }
     }
 
-    @SuppressLint("MissingPermission")
+    // 권한 확인 함수
+    private fun checkLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    @SuppressLint("MissingPermission") // checkLocationPermission()으로 권한을 확인했으므로 lint 경고 무시
     private fun startTracking() {
+        if (!::map.isInitialized) {
+            Toast.makeText(this, "지도가 준비되지 않았습니다. 잠시 후 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // MainActivity에서 권한을 받았다는 가정하에, 여기서 다시 한 번 확인합니다.
+        if (!checkLocationPermission()) {
+            Toast.makeText(this, "위치 권한이 없어 산책을 시작할 수 없습니다. 앱 설정에서 권한을 확인해주세요.", Toast.LENGTH_LONG).show()
+            return
+        }
+
         map.clear()
+        polyline = null // 새로운 산책 시작 시 이전 polyline 제거
         pathPoints.clear()
         totalDistance = 0.0
         caloriesValue = 0
@@ -105,45 +192,10 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
         timerRunning = true
         handler.post(timerRunnable)
 
-        polyline = map.addPolyline(
-            PolylineOptions()
-                .color(Color.BLUE)
-                .width(10f)
-        )
-
         tracking = true
-
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult) {
-                for (location in result.locations) {
-                    val latLng = LatLng(location.latitude, location.longitude)
-                    pathPoints.add(latLng)
-                    polyline?.points = pathPoints
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17f))
-
-                    if (pathPoints.size >= 2) {
-                        val last = pathPoints[pathPoints.size - 2]
-                        val current = pathPoints.last()
-                        val result = FloatArray(1)
-                        Location.distanceBetween(
-                            last.latitude, last.longitude,
-                            current.latitude, current.longitude,
-                            result
-                        )
-                        totalDistance += result[0].toDouble()
-                        updateMetrics()
-                    }
-                }
-            }
-        }
-
-        val request = LocationRequest.create().apply {
-            interval = 2000
-            fastestInterval = 1000
-            priority = Priority.PRIORITY_HIGH_ACCURACY
-        }
-
-        fusedLocationClient.requestLocationUpdates(request, locationCallback, mainLooper)
+        // 위치 업데이트 요청 시작
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        Toast.makeText(this, "산책을 시작합니다!", Toast.LENGTH_SHORT).show()
     }
 
     private fun stopTracking() {
@@ -153,36 +205,105 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
         handler.removeCallbacks(timerRunnable)
 
         val elapsedTime = SystemClock.elapsedRealtime() - startTime
-       // val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: "test-uid"
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: "test-uid" // 실제 사용자 UID 사용 권장
 
-        val courseItem = CourseItem(
-            pathPoints = pathPoints.toList(),
-            distance = totalDistance,
-            duration = elapsedTime / 1000, // 밀리초를 초 단위로 변환
-            calories = caloriesValue,
-            createdBy = uid,
-            timestamp = Timestamp.now()
-        )
+        //카메라 위치 조정
+        if (pathPoints.isEmpty()) {
+            val boundsBuilder = LatLngBounds.builder()
+            for (point in pathPoints) {
+                boundsBuilder.include(point)
+            }
+            val bounds = boundsBuilder.build()
 
-        val intent = Intent(this, DiaryWriteActivity::class.java)
-        intent.putExtra("courseItem", courseItem)
-        startActivity(intent)
-        finish()
+            val padding = 500 //픽셀 단위
+            val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds,padding)
+
+            map.moveCamera(cameraUpdate)
+        } else {
+            // 경로가 없다면 기본 줌 레벨로 변경
+            if (map.cameraPosition.zoom > 15f) {
+                val currentLatLng = map.cameraPosition.target
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
+            }
+        }
+
+        // 지도 캡처 후 Bitmap 저장 → Uri로 변환 → Intent로 전달
+        map.snapshot { bitmap ->
+            if (bitmap == null) {
+                Toast.makeText(this, "지도 캡처에 실패했어요.", Toast.LENGTH_SHORT).show()
+                return@snapshot
+            }
+
+            val imageFile = saveBitmapToFile(bitmap)
+            val imageUri = imageFile?.toUri()
+
+            if (imageUri == null) {
+                Toast.makeText(this, "이미지 저장에 실패했어요.", Toast.LENGTH_SHORT).show()
+                return@snapshot
+            }
+
+            val courseItem = CourseItem(
+                date = LocalDate.now(), // 현재 날짜 사용
+                pathPoints = pathPoints.toList(),
+                distance = totalDistance,
+                duration = elapsedTime / 1000,
+                calories = caloriesValue,
+                createdBy = uid,
+                timestamp = Timestamp.now()
+            )
+
+            val intent = Intent(this, DiaryWriteActivity::class.java).apply {
+                putExtra("courseItem", courseItem)
+                putExtra("mapImageUri", imageUri.toString())
+            }
+
+            startActivity(intent)
+            finish()
+        }
+        Toast.makeText(this, "산책을 종료합니다!", Toast.LENGTH_SHORT).show()
     }
 
+    private fun saveBitmapToFile(bitmap: Bitmap): File? {
+        val fileName = "walk_map_${System.currentTimeMillis()}.png"
+        val file = File(cacheDir, fileName)
+        return try {
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+            file
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e("WalkActivity", "비트맵 파일 저장 실패: ${e.message}")
+            null
+        }
+    }
 
     private fun updateMetrics() {
+
+        //산책한 총 거리, km단위로 나타냄
         val distanceKm = totalDistance / 1000.0
+
+        //현재시간 - 시작시간 -> 산책이 진행된 시간이 나타남
         val elapsedSeconds = (SystemClock.elapsedRealtime() - startTime) / 1000.0
-        val speed = if (elapsedSeconds > 0) (totalDistance / elapsedSeconds) else 0.0
-        val pace = if (speed > 0) (1000 / speed) / 60 else 0.0
+
+        //이동 거리(M/s) -> 초당 몇 미터 이동했는지 계산
+        val speedMps = if (elapsedSeconds > 0) (totalDistance / elapsedSeconds) else 0.0
+
+        //M/s -> Km/h로 변환
+        val speedKmph = speedMps * 3.6
+
+        //킬로미터 당 소요시간(M/km)
+        val paceMinutesPerKm = if (speedKmph > 0) (60.0 / speedKmph) else 0.0
+
+        //킬로미터 당 약 60kcal 소모한다고 가정
         val kcal = (distanceKm * 60).roundToInt()
 
         caloriesValue = kcal
 
-        tvDistance.text = String.format("%.2f km", distanceKm)
-        tvSpeed.text = if (pace > 0) String.format("%.0f’%02.0f’’", pace.toInt(), (pace * 60 % 60)) else "0’00’’"
+        tvDistance.text = String.format("%.2f", distanceKm)
+        val minutes = paceMinutesPerKm.toInt()
+        val seconds = ((paceMinutesPerKm - minutes) * 60).roundToInt()
+        tvSpeed.text = String.format("%d'%02d'", minutes, seconds)
         tvKcal.text = "$kcal kcal"
     }
 

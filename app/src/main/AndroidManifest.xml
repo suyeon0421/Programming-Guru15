@@ -18,6 +18,12 @@
         android:theme="@style/Theme.DogWalkApp"
         tools:targetApi="31">
         <activity
+            android:name=".activity.DiaryDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.MyPageActivity"
+            android:exported="false" />
+        <activity
             android:name=".activity.DiaryCommunityActivity"
             android:exported="false" />
         <activity
@@ -35,8 +41,6 @@
         <activity
             android:name=".activity.LoginActivity"
             android:exported="false" />
-
-
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"
@@ -65,6 +69,7 @@
                     android:scheme="c6652648e6d66eb28c5a75fec2e683cb" />
             </intent-filter>
         </activity>
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBWS3Efzv8Fc6jzNE0Zr2fdwBQoFca8iA8" />
