@@ -1,0 +1,24 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.DogWalkApp" parent="Theme.AppCompat.Light">
+
+        <!-- 상태바 배경 흰색으로 -->
+        <item name="android:statusBarColor">@android:color/white</item>
+        <!-- 상태바 아이콘은 검정색 (밝은 배경에 어울리게) -->
+        <item name="android:windowLightStatusBar">true</item>
+
+    </style>
+
+    <style name="ChipStyle.BlueOutline" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/chip_background_color</item>
+        <item name="chipStrokeColor">@color/chip_stroke_color</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipCornerRadius">16dp</item>
+        <item name="android:textColor">@color/chip_text_color</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="rippleColor">@android:color/transparent</item>
+    </style>
+
+
+    <style name="Theme.DogWalkApp" parent="Base.Theme.DogWalkApp" />
+</resources>
