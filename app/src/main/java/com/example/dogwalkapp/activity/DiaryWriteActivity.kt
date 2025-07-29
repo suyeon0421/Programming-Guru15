@@ -6,10 +6,13 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import com.bumptech.glide.Glide
 import com.example.dogwalkapp.models.CourseItem
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -28,14 +31,12 @@ import com.google.type.LatLng
 
 public class DiaryWriteActivity : AppCompatActivity() {
 
-    private lateinit var mapView: MapView
+    private lateinit var mapImageView: ImageView
 
     private lateinit var chipStyleGroup: ChipGroup
     private lateinit var chipPathGroup: ChipGroup
     private lateinit var etMemo: EditText
     private lateinit var btnSave: Button
-
-    private lateinit var course: CourseItem
 
     private lateinit var courseItem: CourseItem
     private val db = FirebaseFirestore.getInstance()
@@ -48,9 +49,10 @@ public class DiaryWriteActivity : AppCompatActivity() {
         val tvDistance = findViewById<TextView>(R.id.tvDistance)
         val tvDuration = findViewById<TextView>(R.id.tvDuration)
         val tvCalories = findViewById<TextView>(R.id.tvCalories)
+        mapImageView = findViewById(R.id.imageMapResult)
 
-        mapView = findViewById(R.id.mapView)
-        mapView.onCreate(savedInstanceState)
+        val mapImageUriStr = intent.getStringExtra("mapImageUri")
+        val mapImageUri = mapImageUriStr?.toUri()
 
         courseItem = intent.getParcelableExtra<CourseItem>("courseItem") ?: run {
             Toast.makeText(this, "데이터를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
@@ -58,18 +60,10 @@ public class DiaryWriteActivity : AppCompatActivity() {
             return
         }
 
-        mapView.getMapAsync { googleMap ->
-            // courseItem.pathPoints는 com.google.type.LatLng 타입일 거니까
-            val pathPointsGms: List<com.google.android.gms.maps.model.LatLng> = courseItem.pathPoints.map { p ->
-                com.google.android.gms.maps.model.LatLng(p.latitude, p.longitude)
-            }
+        Glide.with(this)
+            .load(mapImageUri)
+            .into(findViewById(R.id.imageMapResult))
 
-            showPathOnMap(googleMap, pathPointsGms)
-        }
-
-
-        //지도에 pathPoints 표시
-        val pathPoins = courseItem.pathPoints
 
         //거리: Km 단위
         val distanceKm = courseItem.distance / 1000.0
@@ -127,13 +121,11 @@ public class DiaryWriteActivity : AppCompatActivity() {
     // ChipGroup에서 선택된 Chip의 텍스트를 반환하는 함수
     private fun getSelectedChipText(chipGroup: ChipGroup): String {
         val checkedChipId = chipGroup.checkedChipId
-        if (checkedChipId != View.NO_ID) {
+        return if (checkedChipId != -1) {
             val chip = chipGroup.findViewById<Chip>(checkedChipId)
-            return chip?.text.toString()
-        }
-        return ""
+            chip?.text.toString()
+        } else ""
     }
-
 
     // ChipGroup 내에서 텍스트와 같은 Chip을 찾아 선택 상태로 만드는 함수
     private fun setChipGroupSelection(chipGroup: ChipGroup, text: String) {
@@ -146,26 +138,25 @@ public class DiaryWriteActivity : AppCompatActivity() {
         }
     }
 
-    // 경로 그리는 함수
-    private fun showPathOnMap(map: GoogleMap, pathPoints: List<com.google.android.gms.maps.model.LatLng>) {
-
-    val polylineOptions = PolylineOptions()
-            .color(Color.BLUE)
-            .width(8f)
-            .addAll(courseItem.pathPoints)
-
-        map.addPolyline(polylineOptions)
-
-        if (pathPoints.isNotEmpty()) {
-            val bounds = LatLngBounds.builder()
-            pathPoints.forEach { bounds.include(it) }
-            map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 100))
-        }
-    }
-
     private fun saveCourseToFirebase(course: CourseItem) {
         val uid = auth.currentUser?.uid ?: return
         val documentRef = db.collection("courses").document() // 자동 ID 생성
+
+        val data = hashMapOf(
+            "createdBy" to uid,
+            "distance" to course.distance,
+            "duration" to course.duration,
+            "calories" to course.calories,
+            "imageUrl" to course.imageUrl,
+            "petName" to course.petName,
+            "walkStyle" to course.walkStyle,
+            "pathReview" to course.pathReview,
+            "memo" to course.memo,
+            "timestamp" to course.timestamp,
+            // 변환된 필드들
+            "pathPoints" to course.pathPoints.map { GeoPoint(it.latitude, it.longitude) },
+            "date" to course.date.toString() // 예: "2025-07-28"
+        )
 
         documentRef.set(course, SetOptions.merge())
             .addOnSuccessListener {
@@ -176,24 +167,4 @@ public class DiaryWriteActivity : AppCompatActivity() {
                 Toast.makeText(this, "저장에 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
     }
-
-        override fun onResume() {
-            super.onResume()
-            mapView.onResume()
-        }
-
-        override fun onPause() {
-            super.onPause()
-            mapView.onPause()
-        }
-
-        override fun onDestroy() {
-            super.onDestroy()
-            mapView.onDestroy()
-        }
-
-        override fun onLowMemory() {
-            super.onLowMemory()
-            mapView.onLowMemory()
-        }
-    }
+}

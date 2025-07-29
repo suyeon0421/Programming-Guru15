@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("kotlin-parcelize")
     id("com.google.gms.google-services") // Firebase용
+    id("kotlin-kapt")
 }
 
 android {
@@ -30,6 +31,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -42,6 +44,7 @@ android {
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.2.2")) //파이어베이스
     implementation("com.google.firebase:firebase-analytics-ktx") //파이어베이스
+    implementation ("com.google.firebase:firebase-functions-ktx") //functions 호출용
 
 
     implementation("com.kakao.sdk:v2-user:2.19.0") // 카카오 로그인
@@ -49,6 +52,8 @@ dependencies {
     implementation ("com.google.android.gms:play-services-maps:18.1.0")       // 지도
     implementation ("com.google.android.gms:play-services-location:21.0.1")  // 위치
 
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.widget.Toast
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -24,15 +25,17 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.example.dogwalkapp.adapter.CourseAdapter
 import com.example.dogwalkapp.adapter.WeekAdapter
+import com.example.dogwalkapp.base.NavigationActivity
 import com.example.dogwalkapp.models.CourseItem
 import com.google.android.gms.location.LocationServices
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.firestore.FirebaseFirestore
 import java.time.LocalDate
 import java.time.DayOfWeek
 
 
 //메인 화면
-class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+class MainActivity : NavigationActivity(), OnMapReadyCallback {
 
     private lateinit var googleMap: GoogleMap
 
@@ -53,9 +56,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     val location = "서울시 노원구"
     val dogName = "시고르자브종"
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        setupBottomNavigation(R.id.nav_home)
 
         setupCourseRecyclerView()
         setupWeekRecyclerView()
@@ -89,6 +95,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             val intent = Intent(this, DiaryCalendarActivity::class.java)
             startActivity(intent)
         }
+
+        db.collection("courses")
+            .get()
+            .addOnSuccessListener { result ->
+                Log.d("FirestoreTest", "데이터 조회 성공, 문서 수: ${result.size()}")
+                // 데이터 처리 코드...
+            }
+            .addOnFailureListener { exception ->
+                Log.e("FirestoreTest", "데이터 조회 실패", exception)
+            }
+
 
 
 
@@ -152,56 +169,56 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         outState.putBundle(MAP_VIEW_BUNDLE_KEY, mapViewBundle)
     }
 
-    private fun setupCourseRecyclerView() {
-        courseAdapter = CourseAdapter { course ->
-            // 아이템 클릭 리스너 (기존과 동일)
-            Toast.makeText(this, "${course.title} 코스를 선택하셨습니다.", Toast.LENGTH_SHORT).show()
-        }
+  // private fun setupCourseRecyclerView() {
+  //     courseAdapter = CourseAdapter { course ->
+  //         // 아이템 클릭 리스너 (기존과 동일)
+  //         Toast.makeText(this, "${course.title} 코스를 선택하셨습니다.", Toast.LENGTH_SHORT).show()
+  //     }
 
-        val recyclerView = findViewById<RecyclerView>(R.id.courseRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        recyclerView.adapter = courseAdapter
+  //     val recyclerView = findViewById<RecyclerView>(R.id.courseRecyclerView)
+  //     recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+  //     recyclerView.adapter = courseAdapter
 
-        // --- 여기부터 임시 데이터 생성 및 제출 ---
-        val dummyCourses = listOf(
-            CourseItem(
-                title = "우리 동네 한바퀴 산책",
-                distance = 2.5,
-                duration = 1800
-            ),
-            CourseItem(
-                title = "공원 옆 숲길 코스",
-                distance = 4.0,
-                duration = 3000
-            ),
-            CourseItem(
-                title = "강변 따라 걷기",
-                distance = 6.2,
-                duration = 10800
-            ),
-            CourseItem(
-                title = "카페거리 탐방",
-                distance = 3.0,
-                duration = 3600
-            )
-        )
-        courseAdapter.setItems(dummyCourses)
-    }
+  //     // --- 여기부터 임시 데이터 생성 및 제출 ---
+  //     val dummyCourses = listOf(
+  //         CourseItem(
+  //             title = "우리 동네 한바퀴 산책",
+  //             distance = 2.5,
+  //             duration = 1800
+  //         ),
+  //         CourseItem(
+  //             title = "공원 옆 숲길 코스",
+  //             distance = 4.0,
+  //             duration = 3000
+  //         ),
+  //         CourseItem(
+  //             title = "강변 따라 걷기",
+  //             distance = 6.2,
+  //             duration = 10800
+  //         ),
+  //         CourseItem(
+  //             title = "카페거리 탐방",
+  //             distance = 3.0,
+  //             duration = 3600
+  //         )
+  //     )
+  //     courseAdapter.setItems(dummyCourses)
+  // }
 
- //  private fun setupCourseRecyclerView() {
- //      courseAdapter = CourseAdapter { course ->
- //          Toast.makeText(this, "${course.title} 코스를 선택하셨습니다.", Toast.LENGTH_SHORT).show()
+   private fun setupCourseRecyclerView() {
+       courseAdapter = CourseAdapter { course ->
+           Toast.makeText(this, "${course.title} 코스를 선택하셨습니다.", Toast.LENGTH_SHORT).show()
 
- //      }
+       }
 
- //      val recyclerView = findViewById<RecyclerView>(R.id.courseRecyclerView)
+       val recyclerView = findViewById<RecyclerView>(R.id.courseRecyclerView)
 
- //      recyclerView.layoutManager =
- //          LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
- //      recyclerView.adapter = courseAdapter
+       recyclerView.layoutManager =
+           LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+       recyclerView.adapter = courseAdapter
 
- //      fetchCourses()
- //  }
+       fetchCourses()
+   }
 
     private fun setupWeekRecyclerView() {
         val recyclerView = findViewById<RecyclerView>(R.id.weekRecyclerView)
@@ -231,14 +248,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
     private fun fetchCourses() {
-
-
         db.collection("courses")
             .whereEqualTo("region", "공릉동")
             .limit(3)
             .get()
             .addOnSuccessListener { result ->
-                val courseList = result.documents.mapNotNull { it.toObject(CourseItem::class.java) }
+                val courseList = result.documents.mapIndexedNotNull { index, doc ->
+                    val base = doc.toObject(CourseItem::class.java)
+                    base?.copy(title = "추천 코스 ${index + 1}") // 🔥 고정 제목 추가!
+                }
                 courseAdapter.setItems(courseList)
             }
             .addOnFailureListener {
