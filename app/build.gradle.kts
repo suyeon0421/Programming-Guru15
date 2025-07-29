@@ -44,6 +44,7 @@ android {
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.2.2")) //파이어베이스
     implementation("com.google.firebase:firebase-analytics-ktx") //파이어베이스
+    implementation ("com.google.firebase:firebase-functions-ktx") //functions 호출용
 
 
     implementation("com.kakao.sdk:v2-user:2.19.0") // 카카오 로그인

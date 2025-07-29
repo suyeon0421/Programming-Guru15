@@ -9,6 +9,11 @@
 
     </style>
 
+    <style name="Theme.DogWalkApp.WarmLightStatusBar" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">#FFFCE7</item>
+        <item name="android:windowLightStatusBar">true</item> <!-- 검정 아이콘 -->
+    </style>
+
     <style name="ChipStyle.BlueOutline" parent="Widget.MaterialComponents.Chip.Choice">
         <item name="chipBackgroundColor">@color/chip_background_color</item>
         <item name="chipStrokeColor">@color/chip_stroke_color</item>

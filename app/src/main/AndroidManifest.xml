@@ -17,6 +17,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DogWalkApp"
         tools:targetApi="31">
+
+        <activity
+            android:name=".activity.PetInfoActivity"
+            android:theme="@style/Theme.DogWalkApp.WarmLightStatusBar"
+            android:exported="false" />
+        <activity
+            android:name=".activity.FindPasswordActivity"
+            android:theme="@style/Theme.DogWalkApp.WarmLightStatusBar"
+            android:exported="false" />
+        <activity
+            android:name=".activity.SignupCompleteActivity"
+            android:theme="@style/Theme.DogWalkApp.WarmLightStatusBar"
+            android:exported="false" />
         <activity
             android:name=".activity.DiaryDetailActivity"
             android:exported="false" />
@@ -37,9 +50,14 @@
             android:exported="false" />
         <activity
             android:name=".activity.SignupActivity"
+            android:theme="@style/Theme.DogWalkApp.WarmLightStatusBar"
             android:exported="false" />
         <activity
             android:name=".activity.LoginActivity"
+            android:theme="@style/Theme.DogWalkApp.WarmLightStatusBar"
+            android:exported="false" />
+        <activity
+            android:name=".activity.MainActivity"
             android:exported="false" />
 
         <meta-data
@@ -47,7 +65,7 @@
             android:value="c6652648e6d66eb28c5a75fec2e683cb" />
 
         <activity
-            android:name=".activity.MainActivity"
+            android:name=".activity.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF9EA"
+    android:padding="24dp">
+
+    <!-- 상단 타이틀 -->
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/pretendard_semibold"
+        android:text="회원가입"
+        android:textColor="#121212"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/img_complete"
+        android:layout_width="148dp"
+        android:layout_height="148dp"
+        android:layout_marginTop="140dp"
+        android:contentDescription="가입완료"
+        android:src="@drawable/ic_logo_symbol_2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_title" />
+
+    <!-- 설명 메시지 -->
+    <TextView
+        android:id="@+id/tv_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:fontFamily="@font/pretendard_bold"
+        android:text="회원가입이\n완료되었어요!"
+        android:textAlignment="center"
+        android:textColor="#121212"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/img_complete" />
+
+    <!--완료 버튼-->
+    <Button
+        android:id="@+id/btn_done"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="240dp"
+        android:background="@drawable/rounded_button"
+        app:backgroundTint="#6CA1D9"
+        android:fontFamily="@font/pretendard_semibold"
+        android:text="완료"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/img_complete"
+        app:layout_constraintWidth_percent="0.94" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
