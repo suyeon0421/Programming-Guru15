@@ -100,7 +100,7 @@
         app:backgroundTint="#6CA1D9"
         android:fontFamily="@font/pretendard_regular"
         android:background="@drawable/rounded_button"
-        android:padding="15dp"
+        android:padding="3dp"
         android:text="중복체크"
         android:textColor="#FFFFFF"
         android:textSize="12dp"
