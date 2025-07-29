@@ -75,7 +75,7 @@
         android:paddingStart="15dp"
         android:paddingEnd="15dp"
         android:textColor="#C5C5C7"
-        android:textColorHint="#80858D"
+        android:textColorHint="#C5C5C7"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -189,7 +189,7 @@
                 android:gravity="center"
                 android:fontFamily="@font/pretendard_regular"
                 android:text="남아"
-                android:textColor="#80858D"
+                android:textColor="@drawable/selector_radio_text_color"
                 android:textSize="14sp" />
 
             <RadioButton
@@ -203,7 +203,7 @@
                 android:gravity="center"
                 android:fontFamily="@font/pretendard_regular"
                 android:text="여아"
-                android:textColor="#80858D"
+                android:textColor="@drawable/selector_radio_text_color"
                 android:textSize="14sp" />
         </RadioGroup>
     </LinearLayout>
@@ -277,7 +277,7 @@
             android:gravity="center"
             android:fontFamily="@font/pretendard_regular"
             android:text="예"
-            android:textColor="#80858D"
+            android:textColor="@drawable/selector_radio_text_color"
             android:textSize="14sp" />
 
         <RadioButton
@@ -291,7 +291,7 @@
             android:gravity="center"
             android:fontFamily="@font/pretendard_regular"
             android:text="아니오"
-            android:textColor="#80858D"
+            android:textColor="@drawable/selector_radio_text_color"
             android:textSize="14sp" />
     </RadioGroup>
 
@@ -329,7 +329,7 @@
             android:button="@null"
             android:gravity="center"
             android:text="소형견"
-            android:textColor="#80858D"
+            android:textColor="@drawable/selector_radio_text_color"
             android:fontFamily="@font/pretendard_regular"
             android:textSize="14sp" />
 
@@ -343,7 +343,7 @@
             android:button="@null"
             android:gravity="center"
             android:text="중형견"
-            android:textColor="#80858D"
+            android:textColor="@drawable/selector_radio_text_color"
             android:fontFamily="@font/pretendard_regular"
             android:textSize="14sp" />
 
@@ -357,7 +357,7 @@
             android:button="@null"
             android:gravity="center"
             android:text="대형견"
-            android:textColor="#80858D"
+            android:textColor="@drawable/selector_radio_text_color"
             android:fontFamily="@font/pretendard_regular"
             android:textSize="14sp" />
     </RadioGroup>
