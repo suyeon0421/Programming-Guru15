@@ -38,6 +38,9 @@ class DiaryCommunitiyAdapter (
 
         fun bind(post:CourseItem) {
             tvAuthor.text = post.petName
+            // tvLocation은 CourseItem에 location 정보가 없다면 표시할 내용이 없습니다.
+            // 만약 CourseItem에 위치 정보가 있다면 여기에 할당하세요.
+            // 예: tvLocation.text = post.locationName // CourseItem에 locationName 필드가 있다고 가정
 
             if(post.imageUrl != null && post.imageUrl.isNotEmpty()) {
                 Glide.with(itemView.context)
@@ -48,8 +51,14 @@ class DiaryCommunitiyAdapter (
                 ivPostImage.visibility = View.GONE
             }
 
-            tvDistance.text = String.format("%.1fkm", post.distance)
+            val distanceKm = post.distance / 1000.0
+
+            tvDistance.text = String.format("%.1fkm", distanceKm)
             tvDuration.text = formatDurationToHHMM(post.duration)
+
+            tvChipStyle.text = post.walkStyle
+            tvChipPath.text = post.pathReview
+
         }
 
         private fun formatDurationToHHMM(duration: Long) : String {

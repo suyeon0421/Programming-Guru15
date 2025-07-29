@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import com.example.dogwalkapp.R
+import java.util.Locale
 import kotlin.collections.mutableListOf
 
 class CourseAdapter(
@@ -29,9 +30,11 @@ class CourseAdapter(
         private val walkButton = itemView.findViewById<TextView>(R.id.courseWalkButton)
 
         fun bind(item: CourseItem) {
+            val distanceKm = item.distance / 1000.0
+            val durationMinutes = item.duration / 60L
             titleText.text = item.title
-            distanceText.text = "${item.distance}km"
-            durationText.text = "${item.duration / 60}분"
+            distanceText.text = String.format(Locale.getDefault(), "%.1fkm", distanceKm)
+            durationText.text = String.format(Locale.getDefault(), "%d분", durationMinutes)
 
             itemView.setOnClickListener { onItemClick(item) }
             walkButton.setOnClickListener { onItemClick(item) }

@@ -128,7 +128,7 @@
     <!-- 카카오 로그인 버튼 -->
     <Button
         android:id="@+id/btn_kakao_login"
-        android:layout_width="0dp"
+        android:layout_width="332dp"
         android:layout_height="48dp"
         android:layout_marginTop="10dp"
         android:text="카카오 로그인"

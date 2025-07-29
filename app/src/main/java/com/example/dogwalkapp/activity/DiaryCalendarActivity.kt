@@ -1,6 +1,7 @@
 package com.example.dogwalkapp.activity
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -8,6 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.dogwalkapp.R
 import com.example.dogwalkapp.adapter.CalendarAdapter
 import com.example.dogwalkapp.base.NavigationActivity
@@ -55,6 +57,7 @@ class DiaryCalendarActivity : NavigationActivity() {
     private lateinit var tvMemoContent: TextView
     private lateinit var walkStyleChip: Chip
     private lateinit var walkRouteChip: Chip
+    private lateinit var imageMapResult: ImageView
 
     private lateinit var walkDataMap: Map<LocalDate, CourseItem>
     private var currentCalendar: Calendar = Calendar.getInstance()
@@ -88,6 +91,7 @@ class DiaryCalendarActivity : NavigationActivity() {
         tvMemoContent = findViewById(R.id.tvMemoContent)
         walkStyleChip = findViewById(R.id.walkStyleChip)
         walkRouteChip = findViewById(R.id.walkRouteChip)
+        imageMapResult = findViewById(R.id.imageMapResult)
 
         setupBottomNavigation(R.id.nav_record)
 
@@ -179,16 +183,28 @@ class DiaryCalendarActivity : NavigationActivity() {
                 val resultMap = mutableMapOf<LocalDate, CourseItem>()
 
                 for (doc in documents) {
-                    val dateString = doc.getString("date") ?: continue
-                    val date = LocalDate.parse(dateString)
+                    // date 필드를 Map 형태로 가져옴
+                    val dateMap = doc.get("date") as? Map<String, Any>
 
-                    val pathPoints = (doc.get("pathPoints") as? List<*>)?.mapNotNull {
-                        val geo = it as? GeoPoint
-                        geo?.let { LatLng(it.latitude, it.longitude) }
-                    } ?: emptyList()
+                    val walkDate: LocalDate
+                    if (dateMap != null) {
+                        val year = (dateMap["year"] as? Long)?.toInt()
+                        val month = (dateMap["monthValue"] as? Long)?.toInt()
+                        val dayOfMonth = (dateMap["dayOfMonth"] as? Long)?.toInt()
+
+                        if (year != null && month != null && dayOfMonth != null) {
+                            walkDate = LocalDate.of(year, month, dayOfMonth) // 성공적으로 할당
+                        } else {
+                            Log.e("DiaryCalendarActivity", "${doc.id}: 년/월/일 정보가 완전하지 않습니다. 이 문서는 건너뜁니다.")
+                            continue // 이 문서의 날짜 정보가 불완전하므로 다음 문서로 넘어감
+                        }
+                    } else {
+                        Log.e("DiaryCalendarActivity", "${doc.id}: date 필드가 Map 형태로 존재하지 않습니다. 이 문서는 건너뜁니다.")
+                        continue // dateMap이 null이므로 다음 문서로 넘어감
+                    }
 
                     val item = CourseItem(
-                        date = date,
+                        date = walkDate,
                         distance = doc.getDouble("distance") ?: 0.0,
                         duration = doc.getLong("duration") ?: 0L,
                         calories = (doc.getLong("calories") ?: 0L).toInt(),
@@ -198,7 +214,7 @@ class DiaryCalendarActivity : NavigationActivity() {
                         pathReview = doc.getString("pathReview") ?: "",
                         memo = doc.getString("memo") ?: ""
                     )
-                    resultMap[date] = item
+                    resultMap[walkDate] = item
                 }
 
                 walkDataMap = resultMap
@@ -273,13 +289,22 @@ class DiaryCalendarActivity : NavigationActivity() {
     }
 
     private fun bindWalkRecord(data: CourseItem) {
-        tvDistance.text = String.format("%.2f km", data.distance)
+        val distanceKm = data.distance / 1000.0
+        tvDistance.text = String.format("%05.2f km", distanceKm)
         tvDuration.text = formatDurationToHHMMSS(data.duration)
         tvCalories.text = "${data.calories} kcal"
         tvMemoContent.text = data.memo
         walkStyleChip.text = data.walkStyle
         walkRouteChip.text = data.pathReview
+
+        if(!data.imageUrl.isNullOrEmpty()) {
+            Glide.with(this)
+                .load(data.imageUrl)
+                .into(imageMapResult)
+            imageMapResult.visibility = View.VISIBLE
+        }
     }
+
 
     private fun formatDurationToHHMMSS(duration: Long): String {
         val hours = duration / 3600

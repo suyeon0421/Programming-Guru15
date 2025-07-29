@@ -4,6 +4,7 @@
 
         <!-- 상태바 배경 흰색으로 -->
         <item name="android:statusBarColor">@android:color/white</item>
+        <item name="android:navigationBarColor">@android:color/white</item>
         <!-- 상태바 아이콘은 검정색 (밝은 배경에 어울리게) -->
         <item name="android:windowLightStatusBar">true</item>
 
@@ -11,8 +12,10 @@
 
     <style name="Theme.DogWalkApp.WarmLightStatusBar" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">#FFFCE7</item>
+        <item name="android:navigationBarColor">#FFFCE7</item>
         <item name="android:windowLightStatusBar">true</item> <!-- 검정 아이콘 -->
     </style>
+
 
     <style name="ChipStyle.BlueOutline" parent="Widget.MaterialComponents.Chip.Choice">
         <item name="chipBackgroundColor">@color/chip_background_color</item>
