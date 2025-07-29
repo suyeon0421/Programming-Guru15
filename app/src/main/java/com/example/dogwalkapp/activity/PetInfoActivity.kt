@@ -21,7 +21,6 @@ class PetInfoActivity : AppCompatActivity() {
     private lateinit var rgType: RadioGroup
     private lateinit var autoBreed: AutoCompleteTextView
     private lateinit var btnNext: Button
-    private lateinit var btnRegisterLater: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

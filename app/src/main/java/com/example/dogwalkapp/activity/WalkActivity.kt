@@ -32,8 +32,11 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Looper
 import android.util.Log
+import android.view.View
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.net.toUri
+import com.bumptech.glide.Glide
 import com.google.android.gms.maps.model.LatLngBounds
 import java.io.File
 import java.io.FileOutputStream
@@ -51,6 +54,7 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var tvDistance: TextView
     private lateinit var tvKcal: TextView
     private lateinit var btnStart: Button
+    private lateinit var minimapImageView: ImageView
 
     private var tracking = false
     private var polyline: Polyline? = null
@@ -60,6 +64,8 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
     private var startTime = 0L
     private var caloriesValue = 0
     private var timerRunning = false
+
+
 
     private val handler = Handler(Looper.getMainLooper()) // Looper.getMainLooper() 명시
     private val timerRunnable = object : Runnable {
@@ -76,11 +82,26 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_walk)
 
+        minimapImageView = findViewById(R.id.minimap_imageView)
+
         tvTimer = findViewById(R.id.tv_timer)
         tvSpeed = findViewById(R.id.tv_speed)
         tvDistance = findViewById(R.id.tv_distance)
         tvKcal = findViewById(R.id.tv_kcal)
         btnStart = findViewById(R.id.btn_start_walk)
+
+        val minimapImageUriString = intent.getStringExtra(DiaryDetailActivity.EXTRA_MINIMAP_IMAGE_URI)
+        if (!minimapImageUriString.isNullOrEmpty()) {
+            // DiaryDetailActivity에서 보낸 URI가 있을 경우에만 실행
+            val minimapUri = Uri.parse(minimapImageUriString)
+            Glide.with(this)
+                .load(minimapUri)
+                .into(minimapImageView)
+            minimapImageView.visibility = View.VISIBLE // 이미지가 있다면 보이도록 설정
+        } else {
+            // URI가 없을 경우 (예: MainActivity에서 시작)
+            minimapImageView.visibility = View.GONE // 미니맵을 숨김
+        }
 
         // LocationCallback 초기화
         locationCallback = object : LocationCallback() {
@@ -300,10 +321,10 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
 
         caloriesValue = kcal
 
-        tvDistance.text = String.format("%.2f", distanceKm)
+        tvDistance.text = String.format("%.2f km", distanceKm)
         val minutes = paceMinutesPerKm.toInt()
         val seconds = ((paceMinutesPerKm - minutes) * 60).roundToInt()
-        tvSpeed.text = String.format("%d'%02d'", minutes, seconds)
+        tvSpeed.text = String.format("%d'%02d' ", minutes, seconds)
         tvKcal.text = "$kcal kcal"
     }
 

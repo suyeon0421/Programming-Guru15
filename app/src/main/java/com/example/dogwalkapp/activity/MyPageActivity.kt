@@ -38,38 +38,45 @@ class MyPageActivity : NavigationActivity() {
         layoutPasswordSetting = findViewById(R.id.layoutPasswordSetting)
         layoutDogInfo = findViewById(R.id.layoutDogInfo)
 
-        // 이메일 설정
+        loadUserProfile()
+
+
+        //비밀번호 재설정
+       layoutPasswordSetting.setOnClickListener {
+           startActivity(Intent(this, FindPasswordActivity::class.java))
+       }
+
+        //반려견 정보 설정
+       layoutDogInfo.setOnClickListener {
+           startActivity(Intent(this, PetInfoActivity::class.java))
+       }
+    }
+
+    private fun loadUserProfile() {
         val currentUser = auth.currentUser
-        if (currentUser != null) {
+        if(currentUser != null) {
             tvEmail.text = currentUser.email ?: "이메일 정보 없음"
 
-            // Firestore에서 이름 가져오기
             db.collection("users").document(currentUser.uid)
                 .get()
                 .addOnSuccessListener { document ->
-                    if (document != null && document.exists()) {
-                        val name = document.getString("name") ?: "사용자 이름 없음"
-                        tvOwnerName.text = "${name} 보호자님"
+                    if(document != null && document.exists()) {
+                        val petMap = document.get("pet") as? Map<String, Any>
+                        val dogName = petMap?.get("name") as? String
+
+                        if (!dogName. isNullOrEmpty()) {
+                            tvOwnerName.text = "${dogName} 보호자님"
+                        } else {
+                            tvOwnerName.text = "사용자 정보 없음"
+                        }
                     } else {
-                        tvOwnerName.text = "이름 정보 없음"
+                        tvOwnerName.text = "사용자 정보 없음"
                     }
                 }
                 .addOnFailureListener { e ->
-                    Log.e("MypageActivity", "Firestore 오류: ${e.message}")
-                    tvOwnerName.text = "이름 불러오기 실패"
+                    Log.e("MyPageActivity", "Firestore에서 사용자 정보 로드 오류: ${e.message}", e)
+                    tvOwnerName.text = "사용자 정보 없음"
                 }
-        } else {
-            tvEmail.text = "로그인 필요"
-            tvOwnerName.text = "이름 정보 없음"
         }
-
-        // 클릭 이벤트
-    //   layoutPasswordSetting.setOnClickListener {
-    //       startActivity(Intent(this, PasswordSettingActivity::class.java))
-    //   }
-
-    //   layoutDogInfo.setOnClickListener {
-    //       startActivity(Intent(this, DogInfoActivity::class.java))
-    //   }
     }
 }

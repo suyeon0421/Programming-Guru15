@@ -29,9 +29,12 @@ import com.example.dogwalkapp.base.NavigationActivity
 import com.example.dogwalkapp.models.CourseItem
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.Timestamp // Timestamp import 추가
 import java.time.LocalDate
 import java.time.DayOfWeek
+import java.time.ZoneId // ZoneId import 추가
 
 
 //메인 화면
@@ -45,7 +48,13 @@ class MainActivity : NavigationActivity(), OnMapReadyCallback {
 
     //산책 하러 가기 뷰
     private lateinit var courseAdapter: CourseAdapter
-    private val db = FirebaseFirestore.getInstance()
+
+    private lateinit var dogNameTextView: TextView
+    private lateinit var locationTextView: TextView
+
+
+    private lateinit var auth: FirebaseAuth
+    private var db = FirebaseFirestore.getInstance()
 
     //위치 권한 활성화
     private val LOCATION_PERMISSION_REQUEST_CODE = 1001
@@ -53,24 +62,27 @@ class MainActivity : NavigationActivity(), OnMapReadyCallback {
     //주간 달력 뷰
     private lateinit var weekAdapter: WeekAdapter
 
-    val location = "서울시 노원구"
-    val dogName = "시고르자브종"
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        locationTextView = findViewById<TextView>(R.id.locationText)
+        dogNameTextView = findViewById<TextView>(R.id.dogNameText)
+
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+
         setupBottomNavigation(R.id.nav_home)
 
         setupCourseRecyclerView()
         setupWeekRecyclerView()
 
-        val locationTextView = findViewById<TextView>(R.id.locationText)
-        val dogNameTextView = findViewById<TextView>(R.id.dogNameText)
 
-        dogNameTextView.text = "$dogName,\n산책을 기다려요!"
-        locationTextView.text = "$location"
+        locationTextView.text = "서울시 노원구"
+
+        loadDogNameFromFirestore()
 
 
         var mapViewBundel: Bundle? = null
@@ -109,6 +121,35 @@ class MainActivity : NavigationActivity(), OnMapReadyCallback {
 
 
 
+    }
+
+    private fun loadDogNameFromFirestore() {
+        val currentUser = auth.currentUser
+        if(currentUser != null) {
+            val uid = currentUser.uid
+
+            db.collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document != null && document.exists()) {
+                        //pet 필드가 Map 형태로 저장
+                        val petMap = document.get("pet") as? Map<String, Any>
+                        val dogName = petMap?.get("name") as? String
+
+                        if (!dogName.isNullOrEmpty()) {
+                            dogNameTextView.text = "$dogName, \n산책을 기다려요!"
+                        } else {
+                            dogNameTextView.text = "사랑하는 반려견이\n산책을 기다려요!"
+                        }
+                    } else {
+                        dogNameTextView.text = "사용자 정보를 불러올 수 없습니다."
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Toast.makeText(this, "반려견 정보 로드 실패: ${exception.message}", Toast.LENGTH_LONG).show()
+                }
+        }
     }
 
     override fun onMapReady(map: GoogleMap) {
@@ -169,46 +210,11 @@ class MainActivity : NavigationActivity(), OnMapReadyCallback {
         outState.putBundle(MAP_VIEW_BUNDLE_KEY, mapViewBundle)
     }
 
-  // private fun setupCourseRecyclerView() {
-  //     courseAdapter = CourseAdapter { course ->
-  //         // 아이템 클릭 리스너 (기존과 동일)
-  //         Toast.makeText(this, "${course.title} 코스를 선택하셨습니다.", Toast.LENGTH_SHORT).show()
-  //     }
-
-  //     val recyclerView = findViewById<RecyclerView>(R.id.courseRecyclerView)
-  //     recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-  //     recyclerView.adapter = courseAdapter
-
-  //     // --- 여기부터 임시 데이터 생성 및 제출 ---
-  //     val dummyCourses = listOf(
-  //         CourseItem(
-  //             title = "우리 동네 한바퀴 산책",
-  //             distance = 2.5,
-  //             duration = 1800
-  //         ),
-  //         CourseItem(
-  //             title = "공원 옆 숲길 코스",
-  //             distance = 4.0,
-  //             duration = 3000
-  //         ),
-  //         CourseItem(
-  //             title = "강변 따라 걷기",
-  //             distance = 6.2,
-  //             duration = 10800
-  //         ),
-  //         CourseItem(
-  //             title = "카페거리 탐방",
-  //             distance = 3.0,
-  //             duration = 3600
-  //         )
-  //     )
-  //     courseAdapter.setItems(dummyCourses)
-  // }
 
    private fun setupCourseRecyclerView() {
        courseAdapter = CourseAdapter { course ->
-           Toast.makeText(this, "${course.title} 코스를 선택하셨습니다.", Toast.LENGTH_SHORT).show()
-
+           val intent = Intent(this, DiaryCommunityActivity::class.java)
+           startActivity(intent)
        }
 
        val recyclerView = findViewById<RecyclerView>(R.id.courseRecyclerView)
@@ -232,7 +238,8 @@ class MainActivity : NavigationActivity(), OnMapReadyCallback {
 
         // 어댑터 생성 (클릭 이벤트 포함)
         weekAdapter = WeekAdapter(weekDates, walkedDates) { selectedDate ->
-            Toast.makeText(this, "선택한 날짜: $selectedDate", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, DiaryCalendarActivity::class.java)
+            startActivity(intent)
         }
 
         recyclerView.adapter = weekAdapter
@@ -248,20 +255,30 @@ class MainActivity : NavigationActivity(), OnMapReadyCallback {
 
 
     private fun fetchCourses() {
-        db.collection("courses")
-            .whereEqualTo("region", "공릉동")
-            .limit(3)
-            .get()
-            .addOnSuccessListener { result ->
-                val courseList = result.documents.mapIndexedNotNull { index, doc ->
-                    val base = doc.toObject(CourseItem::class.java)
-                    base?.copy(title = "추천 코스 ${index + 1}") // 🔥 고정 제목 추가!
-                }
-                courseAdapter.setItems(courseList)
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "산책 코스를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
-            }
+        val dummyCourseList = listOf(
+            CourseItem(
+                date = LocalDate.of(2025, 7, 27),
+                distance = 1500.0,
+                duration = 1800L,
+                petName = "치치",
+                title = "가벼운 한 바퀴👣"
+            ),
+            CourseItem(
+                date = LocalDate.of(2025, 7, 25),
+                distance = 2000.0,
+                duration = 3600L,
+                petName = "별이",
+                title = "푸르른 산책길🌳"
+            ),
+            CourseItem(
+                date = LocalDate.of(2025, 7, 23),
+                distance = 2200.0,
+                duration = 3000L,
+                petName = "베티",
+                title = "마라톤 선수급😓"
+            ),
+        )
+        courseAdapter.setItems(dummyCourseList)
     }
 
     fun getThisWeekDates(): List<LocalDate> {

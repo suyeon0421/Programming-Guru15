@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_marginStart="10dp"
+    android:layout_marginEnd="10dp"
+    android:background="@drawable/rounded_dialog_background"
+    android:padding="20dp">
+
+    <ImageView
+    android:id="@+id/dialog_handle"
+    android:layout_width="40dp"
+    android:layout_height="4dp"
+    android:layout_marginTop="8dp"
+    android:background="#E0E0E0"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/filter_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="필터"
+        android:textColor="@android:color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dialog_handle" />
+
+    <TextView
+        android:id="@+id/tv_filter_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="거리"
+        android:textColor="@android:color/black"
+        android:fontFamily="@font/pretendard_bold"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/filter_title" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group_filter_distance_options"
+        android:layout_width="match_parent"
+        android:layout_height="43dp"
+        android:layout_marginTop="8dp"
+        app:singleSelection="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_filter_distance">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_distance_500m_under"
+            style="@style/ChipStyle.BlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="500m 이하"
+            android:textSize="11.5dp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_distance_500m_1km"
+            style="@style/ChipStyle.BlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="500m ~ 1km"
+            android:textSize="11.5dp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_distance_1km_2km"
+            style="@style/ChipStyle.BlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1km ~ 2km"
+            android:textSize="11.5dp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_distance_2km_over"
+            style="@style/ChipStyle.BlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2km 이상"
+            android:textSize="11.5dp"/>
+    </com.google.android.material.chip.ChipGroup>
+
+    <TextView
+        android:id="@+id/tv_filter_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="소요 시간"
+        android:textColor="@android:color/black"
+        android:fontFamily="@font/pretendard_bold"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chip_group_filter_distance_options" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group_filter_duration_options"
+        android:layout_width="match_parent"
+        android:layout_height="43dp"
+        android:layout_marginTop="8dp"
+        app:singleSelection="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_filter_duration">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_duration_20min_under"
+            style="@style/ChipStyle.BlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="20분 이하"
+            android:textSize="11.5dp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_duration_20min_40min"
+            style="@style/ChipStyle.BlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="20분 ~ 40분"
+            android:textSize="11.5dp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_duration_40min_1hour"
+            style="@style/ChipStyle.BlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="40분 ~ 1시간"
+            android:textSize="11.5dp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_duration_1hour_over"
+            style="@style/ChipStyle.BlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1시간 이상"
+            android:textSize="11.5dp"/>
+    </com.google.android.material.chip.ChipGroup>
+
+    <TextView
+        android:id="@+id/tv_filter_style_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="산책 스타일"
+        android:textColor="@android:color/black"
+        android:fontFamily="@font/pretendard_bold"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chip_group_filter_duration_options" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group_filter_walk_style_options"
+        android:layout_width="match_parent"
+        android:layout_height="43dp"
+        android:layout_marginTop="8dp"
+        app:singleSelection="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_filter_style_title">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_style_easy"
+            style="@style/ChipStyle.BlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="여유로운"
+            android:textSize="11.5dp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_style_active"
+            style="@style/ChipStyle.BlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="활발한"
+            android:textSize="11.5dp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_style_tough"
+            style="@style/ChipStyle.BlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="조금은 힘든"
+            android:textSize="11.5dp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_style_explore"
+            style="@style/ChipStyle.BlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="탐색형"
+            android:textSize="11.5dp"/>
+    </com.google.android.material.chip.ChipGroup>
+
+    <TextView
+        android:id="@+id/tv_filter_path_feature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="경로 특징"
+        android:textColor="@android:color/black"
+        android:fontFamily="@font/pretendard_bold"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chip_group_filter_walk_style_options" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group_filter_path_feature_options"
+        android:layout_width="match_parent"
+        android:layout_height="43dp"
+        android:layout_marginTop="8dp"
+        app:singleSelection="true" app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_filter_path_feature">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_path_grass"
+            style="@style/ChipStyle.DarkBlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="평지 위주"
+            android:textSize="11.5dp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_path_sand"
+            style="@style/ChipStyle.DarkBlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="잔디밭 있음"
+            android:textSize="11.5dp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_path_soil"
+            style="@style/ChipStyle.DarkBlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="흙길 있음"
+            android:textSize="11.5dp"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/filter_chip_path_uphill"
+            style="@style/ChipStyle.DarkBlueOutline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="오르막 있음"
+            android:textSize="11.5dp"/>
+    </com.google.android.material.chip.ChipGroup>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="32dp"
+        android:weightSum="4"
+        app:layout_constraintTop_toBottomOf="@+id/chip_group_filter_path_feature_options"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <Button
+            android:id="@+id/btn_filter_reset"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:text="초기화"
+            android:textColor="#929292"
+            app:strokeColor="#929292"
+            app:cornerRadius="8dp"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/btn_filter_apply"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2.5"
+            android:text="적용하기"
+            android:backgroundTint="#6CA1D9"
+            android:textColor="@android:color/white"
+            app:cornerRadius="8dp" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

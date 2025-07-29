@@ -3,6 +3,7 @@ package com.example.dogwalkapp.activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -20,13 +21,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.example.dogwalkapp.R
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.MapView
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.PolylineOptions
 import com.google.firebase.firestore.GeoPoint
-import com.google.type.LatLng
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 
 
 public class DiaryWriteActivity : AppCompatActivity() {
@@ -42,9 +39,15 @@ public class DiaryWriteActivity : AppCompatActivity() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
+    private lateinit var storageRef: StorageReference
+
+    private var currentPetName: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_diary_write)
+
+        storageRef = FirebaseStorage.getInstance().reference
 
         val tvDistance = findViewById<TextView>(R.id.tvDistance)
         val tvDuration = findViewById<TextView>(R.id.tvDuration)
@@ -54,15 +57,24 @@ public class DiaryWriteActivity : AppCompatActivity() {
         val mapImageUriStr = intent.getStringExtra("mapImageUri")
         val mapImageUri = mapImageUriStr?.toUri()
 
+        loadDogNameFromFirestore()
+
         courseItem = intent.getParcelableExtra<CourseItem>("courseItem") ?: run {
             Toast.makeText(this, "데이터를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
 
-        Glide.with(this)
-            .load(mapImageUri)
-            .into(findViewById(R.id.imageMapResult))
+        if (mapImageUri != null) {
+            Glide.with(this)
+                .load(mapImageUri) // 클래스 멤버 변수 사용
+                .into(mapImageView) // mapImageView에 직접 로드
+        } else {
+            // 이미지가 없는 경우를 대비한 처리 (예: 기본 이미지 표시 또는 메시지)
+            mapImageView.setImageResource(R.drawable.ic_launcher_background) // 예시
+            Toast.makeText(this, "지도 이미지를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+            Log.e("DiaryWriteActivity", "WalkActivity로부터 유효한 mapImageUri를 받지 못함.")
+        }
 
 
         //거리: Km 단위
@@ -106,15 +118,18 @@ public class DiaryWriteActivity : AppCompatActivity() {
             val updatedCourseItem = courseItem.copy(
                 walkStyle = selectedStyle,
                 pathReview = selectedPath,
-                memo = memo
+                memo = memo,
+                petName = currentPetName ?: "알 수 없음",
+                timestamp = com.google.firebase.Timestamp.now()
             )
 
-            saveCourseToFirebase(updatedCourseItem)
-
-            val intent = Intent(this, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
-            finish()
+            // 이미지 업로드 후 DB 저장
+            if (mapImageUri != null) {
+                uploadImageToFirebaseStorage(mapImageUri!!, updatedCourseItem)
+            } else {
+                // 이미지가 없는 경우, 이미지 없이 데이터만 저장
+                saveCourseToFirebase(updatedCourseItem)
+            }
         }
     }
 
@@ -138,29 +153,96 @@ public class DiaryWriteActivity : AppCompatActivity() {
         }
     }
 
+    //URL 얻는 함수
+    private fun uploadImageToFirebaseStorage(imageUri: android.net.Uri, course: CourseItem) {
+        val uid = auth.currentUser?.uid ?: run {
+            Toast.makeText(this, "사용자 인증 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val fileName = "walk_maps/${uid}_${System.currentTimeMillis()}.png"
+        val imageRef = storageRef.child(fileName)
+
+        imageRef.putFile(imageUri)
+            .addOnSuccessListener { taskSnapshot ->
+                imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                    Log.d("DiaryWriteActivity", "Storage 업로드 성공, 다운로드 URL: $downloadUri")
+                    // CourseItem에 다운로드 URL 업데이트
+                    val updatedCourseWithImageUrl = course.copy(imageUrl = downloadUri.toString())
+                    saveCourseToFirebase(updatedCourseWithImageUrl) // 업데이트된 CourseItem으로 DB 저장
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("DiaryWriteActivity", "Storage 업로드 실패: ${e.message}")
+                Toast.makeText(this, "지도 이미지 업로드에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                // 이미지 업로드 실패 시에도 나머지 데이터는 저장할지 결정.
+                // 이 경우 imageUrl은 null이거나 이전 값 그대로 남게 됩니다.
+                saveCourseToFirebase(course)
+            }
+    }
+
+    private fun loadDogNameFromFirestore() {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            val uid = currentUser.uid
+
+            db.collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document != null && document.exists()) {
+                        //pet 필드가 Map 형태로 저장
+                        val petMap = document.get("pet") as? Map<String, Any>
+                        val dogName = petMap?.get("name") as? String
+                        currentPetName = dogName
+                    } else {
+                        currentPetName = "알 수 없음"
+                        Log.w("DiaryWriteActivity", "사용자 문서에 pet 정보가 없습니다.")
+                    }
+                }
+                .addOnFailureListener { e ->
+                    currentPetName = "알 수 없음"
+                    Log.e("DiaryWriteActivity", "강아지 이름 로드 실패: ${e.message}")
+                }
+        }
+    }
+
     private fun saveCourseToFirebase(course: CourseItem) {
         val uid = auth.currentUser?.uid ?: return
         val documentRef = db.collection("courses").document() // 자동 ID 생성
 
-        val data = hashMapOf(
-            "createdBy" to uid,
+        val dataToSave = hashMapOf(
+            "calories" to course.calories,
+            "createdBy" to course.createdBy,
+            "date" to hashMapOf( // LocalDate를 Map으로 변환
+                "year" to course.date.year,
+                "month" to course.date.month.toString(),
+                "monthValue" to course.date.monthValue,
+                "dayOfMonth" to course.date.dayOfMonth,
+                "dayOfWeek" to course.date.dayOfWeek.toString(),
+                "dayOfYear" to course.date.dayOfYear,
+                "era" to course.date.era.toString(),
+                "chronology" to hashMapOf("id" to "ISO", "calendarType" to "iso8601"),
+                "leapYear" to course.date.isLeapYear,
+            ),
             "distance" to course.distance,
             "duration" to course.duration,
-            "calories" to course.calories,
             "imageUrl" to course.imageUrl,
-            "petName" to course.petName,
-            "walkStyle" to course.walkStyle,
-            "pathReview" to course.pathReview,
             "memo" to course.memo,
+            "pathPoints" to course.pathPoints.map { GeoPoint(it.latitude, it.longitude) }, // List<LatLng> to List<GeoPoint>
+            "pathReview" to course.pathReview,
+            "petName" to course.petName,
             "timestamp" to course.timestamp,
-            // 변환된 필드들
-            "pathPoints" to course.pathPoints.map { GeoPoint(it.latitude, it.longitude) },
-            "date" to course.date.toString() // 예: "2025-07-28"
-        )
+            "title" to course.title, // CourseItem에 title이 있다면 추가
+            "walkStyle" to course.walkStyle
+            )
 
-        documentRef.set(course, SetOptions.merge())
+        documentRef.set(dataToSave, SetOptions.merge())
             .addOnSuccessListener {
                 Toast.makeText(this, "산책 기록이 저장되었습니다!", Toast.LENGTH_SHORT).show()
+
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
                 finish() // 저장 후 종료
             }
             .addOnFailureListener {
