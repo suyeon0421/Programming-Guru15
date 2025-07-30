@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_home_filled"
+        android:title="홈" />
+
+    <item
+        android:id="@+id/nav_record"
+        android:icon="@drawable/ic_records"
+        android:title="기록" />
+
+    <item
+        android:id="@+id/nav_nearby"
+        android:icon="@drawable/ic_nearby"
+        android:title="내주변" />
+
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_mypage"
+        android:title="마이" />
+</menu>

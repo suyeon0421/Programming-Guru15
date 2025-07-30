@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 체크 되었을 때 배경 -->
+    <item android:state_checked="true" android:color="#224263"/>
+    <!-- 기본 배경 -->
+    <item android:color="#FFFFFF"/>
+</selector>
