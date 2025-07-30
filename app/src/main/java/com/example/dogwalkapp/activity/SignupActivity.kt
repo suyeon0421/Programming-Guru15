@@ -3,6 +3,7 @@ package com.example.dogwalkapp.activity
 import android.content.Intent
 import android.os.Bundle
 import android.text.SpannableStringBuilder
+import android.util.Log
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -50,15 +51,16 @@ class SignupActivity : AppCompatActivity() {
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val result = task.result?.signInMethods
-                        if (result.isNullOrEmpty()) {
-                            Toast.makeText(this, "사용 가능한 이메일입니다.", Toast.LENGTH_SHORT).show()
-                            isEmailChecked = true
-                        } else {
+                        Log.d("EMAIL_CHECK", "signInMethods: $result")
+                        if (result != null && result.isNotEmpty()) {
                             Toast.makeText(this, "이미 가입된 이메일입니다.", Toast.LENGTH_SHORT).show()
                             isEmailChecked = false
+                        } else {
+                            Toast.makeText(this, "사용 가능한 이메일입니다.", Toast.LENGTH_SHORT).show()
+                            isEmailChecked = true
                         }
                     } else {
-                        Toast.makeText(this, "이메일 중복 확인 실패", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "이메일 중복 확인 실패: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                         isEmailChecked = false
                     }
                 }

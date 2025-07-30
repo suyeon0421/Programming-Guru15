@@ -2,6 +2,7 @@ package com.example.dogwalkapp.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -32,9 +33,6 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         auth = FirebaseAuth.getInstance()
-        functions = Firebase.functions
-
-        functions.useEmulator("10.0.2.2", 5001) // Android 에뮬레이터에서 로컬 Functions 에뮬레이터 사용
 
         idEdit = findViewById(R.id.user_email)
         pwEdit = findViewById(R.id.user_pwd)
@@ -88,74 +86,24 @@ class LoginActivity : AppCompatActivity() {
 
     // 카카오 로그인 전체 흐름 처리
     private fun kakaoLogin() {
-        // 카카오 로그인 콜백 함수 정의
         val callback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
             if (error != null) {
                 Toast.makeText(this, "카카오 로그인 실패: ${error.message}", Toast.LENGTH_SHORT).show()
+                Log.e("KAKAO_LOGIN", "로그인 실패", error)
             } else if (token != null) {
-                Toast.makeText(this, "카카오 로그인 성공! Firebase 연동 시도...", Toast.LENGTH_SHORT).show()
-                // 획득한 카카오 AccessToken을 Firebase Cloud Function으로 보내 Custom Token 요청
-                exchangeKakaoTokenForFirebaseToken(token.accessToken)
+                Toast.makeText(this, "카카오 로그인 성공!", Toast.LENGTH_SHORT).show()
+                Log.i("KAKAO_LOGIN", "토큰: ${token.accessToken}")
+                goToMain()
             }
         }
 
-        // 카카오톡 설치 여부에 따라 로그인 방식 결정
-        if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
-            // 카카오톡이 설치되어 있으면 카카오톡 앱으로 로그인
-            //this와 callback 함수만 전달
-            UserApiClient.instance.loginWithKakaoTalk(this, callback = callback)
-        } else {
-            // 카카오톡이 설치되어 있지 않으면 카카오계정(웹 브라우저)으로 로그인
-            UserApiClient.instance.loginWithKakaoAccount(this, callback = callback)
-        }
+        // 무조건 웹 브라우저 로그인만 시도 (에뮬레이터용)
+        UserApiClient.instance.loginWithKakaoAccount(this, callback = callback)
     }
 
-    // Firebase Cloud Functions를 호출하여 Custom Token 받기
-    private fun exchangeKakaoTokenForFirebaseToken(kakaoAccessToken: String) {
-        // Cloud Function에 전달할 데이터 (카카오 Access Token)
-        val data = hashMapOf(
-            "accessToken" to kakaoAccessToken
-        )
 
-        // 배포된 Cloud Function 'verifyKakaoTokenAndCreateFirebaseToken' 호출
-        functions
-            .getHttpsCallable("verifyKakaoTokenAndCreateFirebaseToken") // Cloud Functions에서 정의한 함수 이름
-            .call(data) // 데이터와 함께 함수 호출
-            .addOnSuccessListener { result ->
-                // Cloud Function 호출 성공 및 결과 받기
-                val firebaseToken = (result.data as? Map<String, Any>)?.get("firebaseToken") as? String
-                if (firebaseToken != null) {
-                    // Firebase Custom Token을 받았다면, 이 토큰으로 Firebase에 로그인
-                    signInFirebaseWithCustomToken(firebaseToken)
-                } else {
-                    // Custom Token이 제대로 반환되지 않았을 경우
-                    Toast.makeText(this, "Firebase Custom Token 획득 실패", Toast.LENGTH_SHORT).show()
-                }
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(this, "Firebase Cloud Functions 호출 실패: ${e.message}", Toast.LENGTH_LONG).show()
-                e.printStackTrace() // 디버깅을 위해 스택 트레이스 출력
-            }
-    }
-
-    // Firebase Custom Token으로 Firebase에 로그인
-    private fun signInFirebaseWithCustomToken(firebaseToken: String) {
-        auth.signInWithCustomToken(firebaseToken)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    // Firebase 로그인 성공
-                    goToMain()
-                } else {
-                    // Firebase 로그인 실패
-                    Toast.makeText(this, "Firebase Custom Token 로그인 실패: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-    }
-
-    // 메인 화면으로 이동
     private fun goToMain() {
-        Toast.makeText(this, "카카오 계정으로 로그인 성공!", Toast.LENGTH_SHORT).show()
-        startActivity(Intent(this, MainActivity::class.java))
+        startActivity(Intent(this, PetInfoActivity::class.java))
         finish()
     }
 }
