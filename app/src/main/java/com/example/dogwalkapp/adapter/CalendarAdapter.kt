@@ -28,7 +28,6 @@ class CalendarAdapter(
         val oldSelectedDate = selectedDate
         selectedDate = date
 
-        // 이전 선택 날짜와 새 선택 날짜의 뷰를 갱신
         // 불필요한 전체 갱신 대신 필요한 아이템만 갱신하여 성능 최적화
         if (oldSelectedDate != null) {
             val oldPos = days.indexOfFirst { it.date == oldSelectedDate }
@@ -115,7 +114,7 @@ class CalendarAdapter(
 
                 }
 
-                // 3. 선택된 날짜 강조 (오늘 날짜 강조 위에 덮어씌움)
+                // 선택된 날짜 강조 (오늘 날짜 강조 위에 덮어씌움)
                 if (item.date == currentSelectedDate) {
                     if (isWeeklyView) {
                         // 주간 뷰: 글자 색상만 변경, 배경은 변경하지 않음
@@ -128,7 +127,7 @@ class CalendarAdapter(
                 }
 
 
-                // 4. 산책 기록 여부에 따른 점 표시
+                // 산책 기록 여부에 따른 점 표시
                 if (isWeeklyView) {
                     walkedDot?.visibility = if (item.walked) View.VISIBLE else View.GONE
                 } else {
@@ -142,8 +141,6 @@ class CalendarAdapter(
         val view = if (isWeeklyView) {
             LayoutInflater.from(parent.context).inflate(R.layout.item_week_day, parent, false)
         } else {
-            // 월간 뷰에서 사용하는 레이아웃 파일 이름을 정확히 명시해주세요.
-            // 예를 들어, item_calendar_day.xml 또는 item_day_cell_monthly.xml 등
             LayoutInflater.from(parent.context).inflate(R.layout.item_day_cell, parent, false) // <-- 여기에 정확한 월간 레이아웃 파일명
         }
         return DayViewHolder(view)
@@ -157,7 +154,7 @@ class CalendarAdapter(
 
     fun updateData(newDays: List<DayItem>) {
         days = newDays
-        // 데이터가 변경되면, 선택된 날짜가 새 데이터 목록에 있는지 확인하고 필요한 경우 다시 선택
+        // 데이터가 변경되면 선택된 날짜가 새 데이터 목록에 있는지 확인하고 필요한 경우 다시 선택
         if (selectedDate != null && !days.any { it.date == selectedDate }) {
             selectedDate = null // 이전에 선택된 날짜가 새 데이터에 없으면 선택 해제
         }

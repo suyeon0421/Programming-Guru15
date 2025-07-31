@@ -11,10 +11,8 @@ import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.dogwalkapp.R
@@ -28,13 +26,9 @@ import com.example.dogwalkapp.adapter.WeekAdapter
 import com.example.dogwalkapp.base.NavigationActivity
 import com.example.dogwalkapp.models.CourseItem
 import com.google.android.gms.location.LocationServices
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.Timestamp // Timestamp import 추가
 import java.time.LocalDate
-import java.time.DayOfWeek
-import java.time.ZoneId // ZoneId import 추가
 
 
 //메인 화면
@@ -151,10 +145,13 @@ class MainActivity : NavigationActivity(), OnMapReadyCallback {
                 }
         }
     }
+    
 
+    //구글맵 지도 관련
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
-
+        
+        //위치 권한
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_GRANTED
         ) {
@@ -234,7 +231,7 @@ class MainActivity : NavigationActivity(), OnMapReadyCallback {
 
         // 날짜 리스트, 산책한 날짜 리스트 초기화
         val weekDates = getThisWeekDates()
-        val walkedDates = listOf<LocalDate>() // 실제 산책 날짜 리스트 넣어주세요
+        val walkedDates = listOf<LocalDate>() 
 
         // 어댑터 생성 (클릭 이벤트 포함)
         weekAdapter = WeekAdapter(weekDates, walkedDates) { selectedDate ->
@@ -249,11 +246,11 @@ class MainActivity : NavigationActivity(), OnMapReadyCallback {
             val totalWidth = recyclerView.width - recyclerView.paddingStart - recyclerView.paddingEnd
             val itemWidth = totalWidth / 7
 
-            weekAdapter.setItemWidth(itemWidth)  // 아래에 setItemWidth 함수 구현 필요
+            weekAdapter.setItemWidth(itemWidth) 
         }
     }
 
-
+    //더미데이터
     private fun fetchCourses() {
         val dummyCourseList = listOf(
             CourseItem(
@@ -281,6 +278,7 @@ class MainActivity : NavigationActivity(), OnMapReadyCallback {
         courseAdapter.setItems(dummyCourseList)
     }
 
+    //주간 달력 계산
     fun getThisWeekDates(): List<LocalDate> {
         val today = LocalDate.now()
         val dayOfWeek = today.dayOfWeek.value

@@ -38,15 +38,14 @@ class DiaryCommunitiyAdapter (
 
         fun bind(post:CourseItem) {
             tvAuthor.text = post.petName
-            // tvLocation은 CourseItem에 location 정보가 없다면 표시할 내용이 없습니다.
-            // 만약 CourseItem에 위치 정보가 있다면 여기에 할당하세요.
-            // 예: tvLocation.text = post.locationName // CourseItem에 locationName 필드가 있다고 가정
 
+            //이미지 URL을 불러옴
             if(post.imageUrl != null && post.imageUrl.isNotEmpty()) {
                 Glide.with(itemView.context)
                     .load(post.imageUrl)
                     .into(ivPostImage)
                 ivPostImage.visibility = View.VISIBLE
+                //없다면 보여주지 않음
             } else {
                 ivPostImage.visibility = View.GONE
             }

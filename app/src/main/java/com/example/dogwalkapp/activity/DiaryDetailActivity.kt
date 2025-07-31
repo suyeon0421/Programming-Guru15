@@ -49,7 +49,7 @@ class DiaryDetailActivity : NavigationActivity() {
             val timeTextView: TextView = findViewById(R.id.text_time)
             val styleChip: Chip = findViewById(R.id.chip_tag1)
             val pathChip: Chip = findViewById(R.id.chip_tag2)
-            val startWalkButton: Button = findViewById(R.id.btnEndWalk) // ✅ 버튼 ID 참조
+            val startWalkButton: Button = findViewById(R.id.btnEndWalk)
 
             // 데이터 채우기
             val imageUrl = p.imageUrl
@@ -62,6 +62,7 @@ class DiaryDetailActivity : NavigationActivity() {
                 mainImageView.visibility = View.GONE
             }
 
+            //지역은 노원구 공릉동으로 지정
             locationTextView.text = "서울 노원구 공릉동"
             petNameTextView.text = "${p.petName ?: "강아지"} 보호자님"
             val distanceKm = p.distance / 1000.0

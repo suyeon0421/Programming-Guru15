@@ -15,7 +15,7 @@ open class NavigationActivity : AppCompatActivity() {
 
         bottomNav.setOnItemSelectedListener { item ->
             val targetClass: Class<*> = when (item.itemId) {
-                R.id.nav_home -> MainActivity::class.java // MainActivity가 아니라 HomeActivity가 메인이라면
+                R.id.nav_home -> MainActivity::class.java //
                 R.id.nav_record -> DiaryCalendarActivity::class.java
                 R.id.nav_nearby -> DiaryCommunityActivity::class.java
                 R.id.nav_profile -> MyPageActivity::class.java

@@ -52,6 +52,7 @@ class MyPageActivity : NavigationActivity() {
        }
     }
 
+    //유저 프로필 불러오기
     private fun loadUserProfile() {
         val currentUser = auth.currentUser
         if(currentUser != null) {

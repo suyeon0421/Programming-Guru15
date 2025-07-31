@@ -29,6 +29,7 @@ class CourseAdapter(
         private val durationText = itemView.findViewById<TextView>(R.id.courseDuration)
         private val walkButton = itemView.findViewById<TextView>(R.id.courseWalkButton)
 
+        //필요 아이템 포맷팅
         fun bind(item: CourseItem) {
             val distanceKm = item.distance / 1000.0
             val durationMinutes = item.duration / 60L

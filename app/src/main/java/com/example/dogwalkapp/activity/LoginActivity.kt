@@ -69,11 +69,11 @@ class LoginActivity : AppCompatActivity() {
                 }
         }
 
-        // 2. 비밀번호 찾기 버튼
+        // 2. 비밀번호 찾기 버튼 -> 액티비티 이동
         btnFindPw.setOnClickListener {
             startActivity(Intent(this, FindPasswordActivity::class.java))
         }
-        // 3. 회원가입 버튼
+        // 3. 회원가입 버튼 -> 액티비티 이동
         btnSignup.setOnClickListener {
             startActivity(Intent(this, SignupActivity::class.java))
         }
@@ -84,12 +84,14 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    // 카카오 로그인 전체 흐름 처리
+    // 카카오 로그인 전체 흐름
     private fun kakaoLogin() {
         val callback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
+            // 에러 발생 시
             if (error != null) {
                 Toast.makeText(this, "카카오 로그인 실패: ${error.message}", Toast.LENGTH_SHORT).show()
                 Log.e("KAKAO_LOGIN", "로그인 실패", error)
+                //토큰 발급이 되었을 시
             } else if (token != null) {
                 Toast.makeText(this, "카카오 로그인 성공!", Toast.LENGTH_SHORT).show()
                 Log.i("KAKAO_LOGIN", "토큰: ${token.accessToken}")
@@ -102,6 +104,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
 
+    // 카카오 로그인 성공 시 펫 정보 입력 액티비티로 이동
     private fun goToMain() {
         startActivity(Intent(this, PetInfoActivity::class.java))
         finish()
