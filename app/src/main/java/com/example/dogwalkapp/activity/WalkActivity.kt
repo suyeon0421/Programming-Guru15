@@ -47,7 +47,7 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var map: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
-    private lateinit var locationRequest: LocationRequest // LocationRequest를 클래스 멤버로 선언
+    private lateinit var locationRequest: LocationRequest
 
     private lateinit var tvTimer: TextView
     private lateinit var tvSpeed: TextView
@@ -99,7 +99,7 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
                 .into(minimapImageView)
             minimapImageView.visibility = View.VISIBLE // 이미지가 있다면 보이도록 설정
         } else {
-            // URI가 없을 경우 (예: MainActivity에서 시작)
+            // URI가 없을 경우
             minimapImageView.visibility = View.GONE // 미니맵을 숨김
         }
 
@@ -139,7 +139,6 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-        // LocationRequest 초기화 (onCreate에서 미리 생성)
         locationRequest = LocationRequest.create().apply {
             interval = 5000
             fastestInterval = 3000
@@ -153,14 +152,12 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
 
         btnStart.setOnClickListener {
             if (!tracking) {
-                // MainActivity에서 권한을 이미 받았다는 가정하에, 여기서는 권한이 있는지 확인만 합니다.
+                //위치 권한이 있다면
                 if (checkLocationPermission()) {
                     startTracking()
                     btnStart.text = "산책 끝내기" // 시작 시 버튼 텍스트 변경
+                    //위치 권한이 없다면
                 } else {
-                    // 이 경우는 MainActivity에서 권한을 받지 못했거나,
-                    // 사용자가 이후에 권한을 취소한 경우에 해당합니다.
-                    // 사용자에게 권한이 필요함을 알리는 메시지를 표시하는 것이 좋습니다.
                     Toast.makeText(this, "위치 권한이 필요합니다. 앱 설정에서 권한을 허용해주세요.", Toast.LENGTH_LONG).show()
                 }
             } else {
@@ -178,8 +175,6 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
         } else {
             // 권한이 없다면 내 위치 기능 비활성화 또는 메시지 표시
             Log.w("WalkActivity", "Location permission not granted. MyLocation layer will be disabled.")
-            // 사용자에게 메시지를 보여줄 수도 있습니다.
-            // Toast.makeText(this, "위치 권한이 없어 내 위치를 표시할 수 없습니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -219,6 +214,8 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
         Toast.makeText(this, "산책을 시작합니다!", Toast.LENGTH_SHORT).show()
     }
 
+
+    //트래킹 멈추기
     private fun stopTracking() {
         tracking = false
         timerRunning = false
@@ -226,7 +223,7 @@ class WalkActivity : AppCompatActivity(), OnMapReadyCallback {
         handler.removeCallbacks(timerRunnable)
 
         val elapsedTime = SystemClock.elapsedRealtime() - startTime
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: "test-uid" // 실제 사용자 UID 사용 권장
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: "test-uid"
 
         //카메라 위치 조정
         if (pathPoints.isEmpty()) {

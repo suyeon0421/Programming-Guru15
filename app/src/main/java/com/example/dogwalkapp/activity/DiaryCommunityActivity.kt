@@ -95,7 +95,7 @@ class DiaryCommunityActivity : NavigationActivity() {
         adapter = DiaryCommunitiyAdapter(
             posts = emptyList(),
             onPostClick = { post ->
-                showDetail(post) // 프래그먼트 대신 액티비티 호출
+                showDetail(post)
             }
         )
 
@@ -137,7 +137,6 @@ class DiaryCommunityActivity : NavigationActivity() {
         btnFilterReset = overlayContainer.findViewById(R.id.btn_filter_reset)
         btnFilterApply = overlayContainer.findViewById(R.id.btn_filter_apply)
 
-        // --- 리스너 설정 ---
         btnFilter.setOnClickListener {
             showFilterOverlay()
         }
@@ -165,6 +164,7 @@ class DiaryCommunityActivity : NavigationActivity() {
         loadPostsFromFirebase()
     }
 
+    //파이어베이스 DB에서 기록 정보 불러오기
     private fun loadPostsFromFirebase() {
         db.collection("courses")
             .orderBy("timestamp", Query.Direction.DESCENDING) //최신순 정렬
@@ -205,8 +205,8 @@ class DiaryCommunityActivity : NavigationActivity() {
             }
     }
 
+    //필터 오버레이 보여주기
     private fun showFilterOverlay() {
-        // 오버레이를 표시하기 전에 현재 적용된 필터 값으로 칩들을 미리 선택해 둡니다.
         setChipGroupSelection(distanceOptions, currentDistance)
         setChipGroupSelection(durationOptions, currentDuration)
         setChipGroupSelection(walkStyleOptions, currentWalkStyle)
@@ -215,12 +215,12 @@ class DiaryCommunityActivity : NavigationActivity() {
         overlayContainer.visibility = View.VISIBLE
     }
 
-    // --- 필터 오버레이 숨기기 ---
+    //필터 오버레이 숨기기
     private fun hideFilterOverlay() {
         overlayContainer.visibility = View.GONE
     }
 
-    // --- 필터 초기화 ---
+    // 필터 초기화
     private fun resetFilters() {
         // 모든 필터 상태 변수 초기화
         currentDistance = ""
@@ -237,7 +237,7 @@ class DiaryCommunityActivity : NavigationActivity() {
         applyFilters()
     }
 
-    // --- 필터 적용 ---
+    // 필터 적용
     private fun applyFilters() {
         // 각 칩 그룹에서 선택된 현재 값 가져오기
         currentDistance = getSelectedChipText(distanceOptions)
@@ -251,10 +251,10 @@ class DiaryCommunityActivity : NavigationActivity() {
         val filteredList = allPosts.filter { post ->
             // 거리 필터 (미터 단위로 비교)
             val isDistanceMatch = when (currentDistance) {
-                "500m 이하" -> post.distance <= 500.0 // ✅ 0.5km -> 500.0m
-                "500m ~ 1km" -> post.distance > 500.0 && post.distance <= 1000.0 // ✅ 0.5km -> 500.0m, 1km -> 1000.0m
-                "1km ~ 2km" -> post.distance > 1000.0 && post.distance <= 2000.0 // ✅ 1km -> 1000.0m, 2km -> 2000.0m
-                "2km 이상" -> post.distance > 2000.0 // ✅ 2km -> 2000.0m
+                "500m 이하" -> post.distance <= 500.0 // 0.5km -> 500.0m
+                "500m ~ 1km" -> post.distance > 500.0 && post.distance <= 1000.0 // 0.5km -> 500.0m, 1km -> 1000.0m
+                "1km ~ 2km" -> post.distance > 1000.0 && post.distance <= 2000.0 // 1km -> 1000.0m, 2km -> 2000.0m
+                "2km 이상" -> post.distance > 2000.0 // 2km -> 2000.0m
                 else -> true // 필터 선택 안 됨 (모두 포함)
             }
 

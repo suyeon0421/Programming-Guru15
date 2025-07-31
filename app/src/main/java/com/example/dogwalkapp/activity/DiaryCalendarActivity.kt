@@ -62,7 +62,7 @@ class DiaryCalendarActivity : NavigationActivity() {
     private lateinit var walkDataMap: Map<LocalDate, CourseItem>
     private var currentCalendar: Calendar = Calendar.getInstance()
     private var isMonthlyView: Boolean = true
-    private var currentSelectedDate: LocalDate = LocalDate.now() // 현재 선택된 날짜를 Activity에서 관리
+    private var currentSelectedDate: LocalDate = LocalDate.now()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -131,7 +131,7 @@ class DiaryCalendarActivity : NavigationActivity() {
         monthlyCalendarAdapter.setSelectedDate(currentSelectedDate)
         weeklyCalendarAdapter.setSelectedDate(currentSelectedDate)
 
-        // 버튼 리스너
+        // 월간 달력 이전 버튼
         prevMonthButton.setOnClickListener {
             if (isMonthlyView) {
                 currentCalendar.add(Calendar.MONTH, -1)
@@ -141,6 +141,7 @@ class DiaryCalendarActivity : NavigationActivity() {
             updateCalendarView()
         }
 
+        // 월간 달력 다음 버튼
         nextMonthButton.setOnClickListener {
             if (isMonthlyView) {
                 currentCalendar.add(Calendar.MONTH, 1)
@@ -149,6 +150,7 @@ class DiaryCalendarActivity : NavigationActivity() {
             }
             updateCalendarView()
         }
+
 
         tvToday.setOnClickListener {
             currentSelectedDate = LocalDate.now() // 오늘 날짜로 선택 날짜 변경
@@ -192,8 +194,10 @@ class DiaryCalendarActivity : NavigationActivity() {
                         val month = (dateMap["monthValue"] as? Long)?.toInt()
                         val dayOfMonth = (dateMap["dayOfMonth"] as? Long)?.toInt()
 
+
+                        // null이 아닐 시에 할당
                         if (year != null && month != null && dayOfMonth != null) {
-                            walkDate = LocalDate.of(year, month, dayOfMonth) // 성공적으로 할당
+                            walkDate = LocalDate.of(year, month, dayOfMonth)
                         } else {
                             Log.e("DiaryCalendarActivity", "${doc.id}: 년/월/일 정보가 완전하지 않습니다. 이 문서는 건너뜁니다.")
                             continue // 이 문서의 날짜 정보가 불완전하므로 다음 문서로 넘어감
@@ -232,6 +236,7 @@ class DiaryCalendarActivity : NavigationActivity() {
         val currentDay = currentCalendar.get(Calendar.DAY_OF_MONTH)
         val tempDate = LocalDate.of(currentYear, currentMonth, currentDay)
 
+        //yyyy년 MM월로 포맷
         val formatter = DateTimeFormatter.ofPattern("yyyy년 MM월")
         tvCurrentMonth.text = formatter.format(tempDate)
 
@@ -252,6 +257,7 @@ class DiaryCalendarActivity : NavigationActivity() {
         }
     }
 
+    //기록이 있으면 walkRecordView를 보여주고 없다면 walkEmptyView를 보여줌
     private fun showWalkViewForDate(date: LocalDate) {
         val data = walkDataMap[date]
         if (data != null) {
@@ -264,6 +270,7 @@ class DiaryCalendarActivity : NavigationActivity() {
         }
     }
 
+    //월간 달력 버튼을 클릭하면 monthlyCalendarRecyclerView을 보여줌
     private fun showMonthlyCalendar() {
         isMonthlyView = true
         monthlyCalendarRecyclerView.visibility = View.VISIBLE
@@ -276,6 +283,7 @@ class DiaryCalendarActivity : NavigationActivity() {
         updateCalendarView()
     }
 
+    //주간 달력 버튼을 클릭하면 weeklyCalendarRecyclerView 보여줌
     private fun showWeeklyCalendar() {
         isMonthlyView = false
         monthlyCalendarRecyclerView.visibility = View.GONE
@@ -288,6 +296,7 @@ class DiaryCalendarActivity : NavigationActivity() {
         updateCalendarView()
     }
 
+    //거리, 시간, 칼로리를 단위에 맞게 포맷팅
     private fun bindWalkRecord(data: CourseItem) {
         val distanceKm = data.distance / 1000.0
         tvDistance.text = String.format("%05.2f km", distanceKm)
@@ -313,6 +322,7 @@ class DiaryCalendarActivity : NavigationActivity() {
         return String.format("%02d:%02d:%02d", hours, minutes, seconds)
     }
 
+    //월간 달력과 주간 달력 생성하기
     private fun generateDaysForMonth(
         calendar: Calendar,
         walkMap: Map<LocalDate, CourseItem>

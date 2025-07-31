@@ -70,8 +70,7 @@ public class DiaryWriteActivity : AppCompatActivity() {
                 .load(mapImageUri) // 클래스 멤버 변수 사용
                 .into(mapImageView) // mapImageView에 직접 로드
         } else {
-            // 이미지가 없는 경우를 대비한 처리 (예: 기본 이미지 표시 또는 메시지)
-            mapImageView.setImageResource(R.drawable.ic_launcher_background) // 예시
+            mapImageView.setImageResource(R.drawable.ic_launcher_background) //지도가 없을 시에 불러옴
             Toast.makeText(this, "지도 이미지를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
             Log.e("DiaryWriteActivity", "WalkActivity로부터 유효한 mapImageUri를 받지 못함.")
         }
@@ -127,7 +126,7 @@ public class DiaryWriteActivity : AppCompatActivity() {
             if (mapImageUri != null) {
                 uploadImageToFirebaseStorage(mapImageUri!!, updatedCourseItem)
             } else {
-                // 이미지가 없는 경우, 이미지 없이 데이터만 저장
+                // 이미지가 없는 경우 데이터만 저장
                 saveCourseToFirebase(updatedCourseItem)
             }
         }
@@ -180,6 +179,7 @@ public class DiaryWriteActivity : AppCompatActivity() {
             }
     }
 
+    //파이어베이스에서 펫 이름 불러오기
     private fun loadDogNameFromFirestore() {
         val currentUser = auth.currentUser
         if (currentUser != null) {
@@ -206,6 +206,7 @@ public class DiaryWriteActivity : AppCompatActivity() {
         }
     }
 
+    //산책 기록 파이어베이스에 저장
     private fun saveCourseToFirebase(course: CourseItem) {
         val uid = auth.currentUser?.uid ?: return
         val documentRef = db.collection("courses").document() // 자동 ID 생성
